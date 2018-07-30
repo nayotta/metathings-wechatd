@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package ai.metathings_wechatd.service.wechatd;
+option go_package = "wechatd";
+
+import "get_session.proto";
+import "get_token.proto";
+
+service WechatdService {
+	rpc GetSession(GetSessionRequest) returns (GetSessionResponse) {}
+	rpc GetToken(GetTokenRequest) returns (GetTokenResponse) {}
+}
