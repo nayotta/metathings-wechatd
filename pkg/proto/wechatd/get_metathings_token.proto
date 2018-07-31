@@ -7,10 +7,10 @@ import "google/protobuf/wrappers.proto";
 
 import "github.com/mwitkow/go-proto-validators/validator.proto";
 
-message GetTokenRequest {
+message GetMetathingsTokenRequest {
 	google.protobuf.StringValue open_id = 1 [(validator.field) = {msg_exists: true}];
 }
 
-message GetTokenResponse {
+message GetMetathingsTokenResponse {
 	string token = 1;
 }

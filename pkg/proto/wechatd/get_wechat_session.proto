@@ -6,11 +6,11 @@ import "google/protobuf/wrappers.proto";
 
 import "github.com/mwitkow/go-proto-validators/validator.proto";
 
-message GetSessionRequest {
+message GetWechatSessionRequest {
 	google.protobuf.StringValue js_code = 1 [(validator.field) = {msg_exists: true}];
 }
 
-message GetSessionResponse {
+message GetWechatSessionResponse {
 	string open_id = 1;
 	string session_key = 2;
 	string union_id = 3;
