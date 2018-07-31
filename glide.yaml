@@ -1,0 +1,5 @@
+package: github.com/nayotta/metathings-wechatd
+import:
+- package: github.com/nayotta/metathings
+  subpackages:
+  - pkg/common/cmd
