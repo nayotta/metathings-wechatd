@@ -3,3 +3,6 @@ import:
 - package: github.com/nayotta/metathings
   subpackages:
   - pkg/common/cmd
+- package: github.com/jinzhu/gorm
+  version: ~1.9.1
+- package: github.com/jinzhu/inflection

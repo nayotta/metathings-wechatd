@@ -137,6 +137,7 @@ func (self *metathingsWechatdService) GetWechatSession(ctx context.Context, req 
 
 	return res, nil
 }
+
 func (self *metathingsWechatdService) GetMetathingsToken(context.Context, *pb.GetMetathingsTokenRequest) (*pb.GetMetathingsTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "unimplemented")
 }

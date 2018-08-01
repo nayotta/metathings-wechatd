@@ -1,5 +1,5 @@
-hash: e5c0209ea91233bbf595d6a958370036d2ea850bc64636e00037492020e35b46
-updated: 2018-07-31T17:07:33.13636+08:00
+hash: a823206ecf87eca276a79491b9862a7ec4a85ac63c3229b8011c1fe0e75a82c5
+updated: 2018-08-01T15:10:20.635122+08:00
 imports:
 - name: github.com/cbroglie/mustache
   version: eb931a9d20042e51d8a3a9ad5a9ba9bc8282c564
@@ -39,6 +39,10 @@ imports:
   - json/token
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jinzhu/gorm
+  version: 6ed508ec6a4ecb3531899a69cbc746ccf65a4166
+- name: github.com/jinzhu/inflection
+  version: 04140366298a54a039076d798123ffa108fff46c
 - name: github.com/magiconair/properties
   version: c2353362d570a7bfa228149c62842019201cfb71
 - name: github.com/mitchellh/mapstructure
