@@ -24,6 +24,8 @@ type _serveOptions struct {
 	Storage       cmd_helper.StorageOptions
 	ServiceConfig cmd_helper.ServiceConfigOptions `mapstructure:"service_config"`
 	Wechat        _wechatConfig
+	DomainId      string `mapstructure:"domain_id"`
+	ProjectId     string `mapstructure:"project_id"`
 }
 
 var (
@@ -68,6 +70,8 @@ func serve() error {
 		service.SetApplicationCredential(serve_opts.ApplicationCredential.Id, serve_opts.ApplicationCredential.Secret),
 		service.SetStorage(serve_opts.Storage.Driver, serve_opts.Storage.Uri),
 		service.SetWechat(serve_opts.Wechat.Appid, serve_opts.Wechat.Secret),
+		service.SetDomainId(serve_opts.DomainId),
+		service.SetProjectId(serve_opts.ProjectId),
 	)
 	if err != nil {
 		log.WithError(err).Errorf("failed to new wechat service")
@@ -91,6 +95,8 @@ func init() {
 	serveCmd.Flags().StringVar(&serve_opts.ApplicationCredential.Secret, "application-credential-secret", "", "Metathings Wetchat Adaptor Service Application Credential Secret")
 	serveCmd.Flags().StringVar(&serve_opts.Wechat.Appid, "wechat-appid", "", "Wechat AppID")
 	serveCmd.Flags().StringVar(&serve_opts.Wechat.Secret, "wechat-secret", "", "Wechat AppSecret")
+	serveCmd.Flags().StringVar(&serve_opts.DomainId, "domain-id", "", "Created user beyond to which domain")
+	serveCmd.Flags().StringVar(&serve_opts.ProjectId, "project-id", "", "Created user beyond to which project")
 
 	RootCmd.AddCommand(serveCmd)
 }

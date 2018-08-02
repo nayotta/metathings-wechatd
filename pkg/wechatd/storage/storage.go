@@ -7,7 +7,6 @@ import (
 )
 
 type ApplicationCredential struct {
-	Id        *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
@@ -17,7 +16,6 @@ type ApplicationCredential struct {
 }
 
 type Token struct {
-	Id        *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
@@ -28,7 +26,7 @@ type Token struct {
 type Storage interface {
 	GetApplicationCredentialByOpenid(openid string) (ApplicationCredential, error)
 	CreateApplicationCredential(app_cred ApplicationCredential) (ApplicationCredential, error)
-	GetTokenByOpenid(openid string) (Token, error)
+	GetTokensByOpenid(openid string) ([]Token, error)
 	CreateToken(tkn Token) (Token, error)
 	DeleteToken(tkn_id string) error
 }
