@@ -16,6 +16,7 @@ type ApplicationCredential struct {
 }
 
 type Token struct {
+	Id        *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
@@ -32,5 +33,5 @@ type Storage interface {
 }
 
 func NewStorage(driver, uri string, logger log.FieldLogger) (Storage, error) {
-	panic("unimplemented")
+	return newStorageImpl(driver, uri, logger)
 }

@@ -1,5 +1,5 @@
-hash: 9c42e2572462bae126efa97cf96e86958c12f49b8a4083d610067f6befab8022
-updated: 2018-08-02T14:13:18.88952+08:00
+hash: 21621687e70c0c09be23bbb62990c0bfa7fb387fd626f7ea7e6a41bd51dffdd4
+updated: 2018-08-02T17:37:53.629623+08:00
 imports:
 - name: github.com/cbroglie/mustache
   version: eb931a9d20042e51d8a3a9ad5a9ba9bc8282c564
@@ -54,10 +54,12 @@ imports:
 - name: github.com/nayotta/metathings
   version: b2f1363c487ce74d58fb22f5e3239c9004b28eba
   subpackages:
+  - pkg/common
   - pkg/common/application_credential_manager
   - pkg/common/client
   - pkg/common/cmd
   - pkg/common/constant
+  - pkg/common/context
   - pkg/common/grpc
   - pkg/common/log
   - pkg/common/net
@@ -81,6 +83,8 @@ imports:
   version: c01d1270ff3e442a8a57cddc1c92dc1138598194
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: github.com/satori/go.uuid
+  version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/sirupsen/logrus
   version: 3e01752db0189b9157070a0e1668a620f9a85da2
 - name: github.com/spf13/afero

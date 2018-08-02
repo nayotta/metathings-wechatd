@@ -15,6 +15,7 @@ import (
 	gpb "github.com/golang/protobuf/ptypes/wrappers"
 	pb "github.com/nayotta/metathings-wechatd/pkg/proto/wechatd"
 	storage "github.com/nayotta/metathings-wechatd/pkg/wechatd/storage"
+	"github.com/nayotta/metathings/pkg/common"
 	app_cred_mgr "github.com/nayotta/metathings/pkg/common/application_credential_manager"
 	client_helper "github.com/nayotta/metathings/pkg/common/client"
 	context_helper "github.com/nayotta/metathings/pkg/common/context"
@@ -305,7 +306,9 @@ func (self *metathingsWechatdService) issueTokenByOpenid(ctx context.Context, op
 		return storage.Token{}, err
 	}
 
+	tkn_id := common.NewId()
 	tkn := storage.Token{
+		Id:     &tkn_id,
 		Openid: &openid,
 		Text:   &token_text,
 	}
