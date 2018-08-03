@@ -140,8 +140,8 @@ func (self *metathingsWechatdService) GetWechatSession(ctx context.Context, req 
 	var sess struct {
 		SessionKey string `json:"session_key"`
 		Openid     string
-		errcode    int
-		errmsg     string
+		Errcode    int
+		Errmsg     string
 	}
 
 	err = json.Unmarshal([]byte(http_body), &sess)
@@ -150,9 +150,9 @@ func (self *metathingsWechatdService) GetWechatSession(ctx context.Context, req 
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	if sess.errcode != 0 {
-		self.logger.WithFields(log.Fields{"errcode": sess.errcode, "errmsg": sess.errmsg}).Errorf("failed to get session from tencent wechat service")
-		return nil, status.Errorf(codes.Internal, sess.errmsg)
+	if sess.Errcode != 0 {
+		self.logger.WithFields(log.Fields{"errcode": sess.Errcode, "errmsg": sess.Errmsg}).Errorf("failed to get session from tencent wechat service")
+		return nil, status.Errorf(codes.Internal, sess.Errmsg)
 	}
 
 	res := &pb.GetWechatSessionResponse{
