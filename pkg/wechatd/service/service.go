@@ -32,6 +32,7 @@ type options struct {
 	application_credential_secret  string
 	domain_id                      string
 	project_id                     string
+	user_roles                     map[string]string
 	storage_driver                 string
 	storage_uri                    string
 	wechat_appid                   string
@@ -42,6 +43,7 @@ type options struct {
 var defaultServiceOptions = options{
 	logLevel:                       "info",
 	wechat_jscode2session_template: "https://api.weixin.qq.com/sns/jscode2session?appid={{appid}}&secret={{secret}}&js_code={{jscode}}&grant_type=authorization_code",
+	user_roles:                     map[string]string{},
 }
 
 type ServiceOptions func(*options)
@@ -94,6 +96,14 @@ func SetWechat(appid, secret string) ServiceOptions {
 	return func(o *options) {
 		o.wechat_appid = appid
 		o.wechat_secret = secret
+	}
+}
+
+func SetUserRoles(roles []string) ServiceOptions {
+	return func(o *options) {
+		for _, role := range roles {
+			o.user_roles[role] = ""
+		}
 	}
 }
 
@@ -180,7 +190,12 @@ func (self *metathingsWechatdService) GetMetathingsToken(ctx context.Context, re
 	}
 
 	if len(tkns) == 0 {
-		self.issueTokenByOpenid(ctx, openid)
+		_, err := self.issueTokenByOpenid(ctx, openid)
+		if err != nil {
+			self.logger.WithError(err).Errorf("failed to issue token by openid")
+			return nil, status.Errorf(codes.Internal, err.Error())
+		}
+
 		tkns, err = self.storage.GetTokensByOpenid(openid)
 		if err != nil {
 			self.logger.WithError(err).Errorf("failed to get tokens by openid from storage")
@@ -188,7 +203,7 @@ func (self *metathingsWechatdService) GetMetathingsToken(ctx context.Context, re
 		}
 
 		if len(tkns) == 0 {
-			self.logger.WithField("openid", openid).Errorf("failed to issue token with openpid")
+			self.logger.WithField("openid", openid).Errorf("failed to issue token with openid")
 			return nil, status.Errorf(codes.Internal, ErrIssueToken.Error())
 		}
 	}
@@ -206,6 +221,7 @@ func (self *metathingsWechatdService) createUserAndApplicationCredential(cli ide
 	password := random_password()
 
 	// Create User
+	wechatd_ctx := context_helper.WithToken(context.Background(), self.app_cred_mgr.GetToken())
 	create_user_req := &identityd_pb.CreateUserRequest{
 		Name:             &gpb.StringValue{Value: username},
 		Password:         &gpb.StringValue{Value: password},
@@ -214,11 +230,26 @@ func (self *metathingsWechatdService) createUserAndApplicationCredential(cli ide
 		Enabled:          &gpb.BoolValue{Value: true},
 	}
 
-	_, err := cli.CreateUser(ctx, create_user_req)
+	create_user_res, err := cli.CreateUser(wechatd_ctx, create_user_req)
 	if err != nil {
 		return storage.ApplicationCredential{}, err
 	}
-	self.logger.WithFields(log.Fields{"openid": openid, "username": username}).Infof("create user in identityd")
+	self.logger.WithFields(log.Fields{"openid": openid, "username": username}).Debugf("create user in identityd")
+
+	// Assign Roles To User
+	user_id := create_user_res.User.Id
+	for role, role_id := range self.opts.user_roles {
+		add_role_to_user_on_project_req := &identityd_pb.AddRoleToUserOnProjectRequest{
+			UserId:    &gpb.StringValue{Value: user_id},
+			ProjectId: &gpb.StringValue{Value: self.opts.project_id},
+			RoleId:    &gpb.StringValue{Value: role_id},
+		}
+		_, err = cli.AddRoleToUserOnProject(wechatd_ctx, add_role_to_user_on_project_req)
+		if err != nil {
+			return storage.ApplicationCredential{}, err
+		}
+		self.logger.WithFields(log.Fields{"openid": openid, "user_id": user_id, "role": role}).Debugf("assign role to user in identityd")
+	}
 
 	// Issue Token
 	var header metadata.MD
@@ -230,14 +261,13 @@ func (self *metathingsWechatdService) createUserAndApplicationCredential(cli ide
 				Username: &gpb.StringValue{Value: username},
 				DomainId: &gpb.StringValue{Value: self.opts.domain_id},
 				Scope: &identityd_pb.TokenScope{
-					DomainId:  &gpb.StringValue{Value: self.opts.domain_id},
 					ProjectId: &gpb.StringValue{Value: self.opts.project_id},
 				},
 			},
 		},
 	}
 
-	issue_token_res, err := cli.IssueToken(ctx, issue_token_req, grpc.Header(&header))
+	_, err = cli.IssueToken(ctx, issue_token_req, grpc.Header(&header))
 	if err != nil {
 		return storage.ApplicationCredential{}, err
 	}
@@ -245,8 +275,6 @@ func (self *metathingsWechatdService) createUserAndApplicationCredential(cli ide
 	self.logger.WithFields(log.Fields{"openid": openid, "username": username, "token": token_str}).Debugf("issue token in identityd")
 
 	// Create Appliction Credential
-	token := issue_token_res.Token
-	user_id := token.User.Id
 	tkn_ctx := context_helper.WithToken(ctx, token_str)
 	create_application_credential_req := &identityd_pb.CreateApplicationCredentialRequest{
 		UserId: &gpb.StringValue{Value: user_id},
@@ -259,7 +287,7 @@ func (self *metathingsWechatdService) createUserAndApplicationCredential(cli ide
 
 	app_cred_id := create_application_credential_res.ApplicationCredential.Id
 	app_cred_secret := create_application_credential_res.ApplicationCredential.Secret
-	self.logger.WithFields(log.Fields{"openid": openid, "app_cred_id": app_cred_id}).Infof("create application credential in identityd")
+	self.logger.WithFields(log.Fields{"openid": openid, "app_cred_id": app_cred_id}).Debugf("create application credential in identityd")
 
 	app_cred, err := self.storage.CreateApplicationCredential(storage.ApplicationCredential{
 		ApplicationCredentialId:     &app_cred_id,
@@ -310,6 +338,7 @@ func (self *metathingsWechatdService) issueTokenByOpenid(ctx context.Context, op
 
 	token_text, err := self.issueToken(cli, context.Background(), *app_cred.ApplicationCredentialId, *app_cred.ApplicationCredentialSecret)
 	if err != nil {
+		self.logger.WithError(err).Errorf("failed to issue token from identityd")
 		return storage.Token{}, err
 	}
 
@@ -327,6 +356,30 @@ func (self *metathingsWechatdService) issueTokenByOpenid(ctx context.Context, op
 	self.logger.WithFields(log.Fields{"openid": openid, "token": token_text}).Debugf("issue token from identityd")
 
 	return tkn, nil
+}
+
+func (self *metathingsWechatdService) initialize() error {
+	cli, cfn, err := self.cli_fty.NewIdentitydServiceClient()
+	if err != nil {
+		return err
+	}
+	defer cfn()
+
+	ctx := context_helper.WithToken(context.Background(), self.app_cred_mgr.GetToken())
+	res, err := cli.ListRoles(ctx, &identityd_pb.ListRolesRequest{})
+	if err != nil {
+		return err
+	}
+
+	for _, role := range res.Roles {
+		if _, ok := self.opts.user_roles[role.Name]; ok {
+			self.opts.user_roles[role.Name] = role.Id
+		}
+	}
+
+	self.logger.Debugf("wechat service initialized")
+
+	return nil
 }
 
 func NewWechatdService(opt ...ServiceOptions) (*metathingsWechatdService, error) {
@@ -373,6 +426,12 @@ func NewWechatdService(opt ...ServiceOptions) (*metathingsWechatdService, error)
 		opts:         opts,
 		logger:       logger,
 		storage:      storage,
+	}
+
+	err = srv.initialize()
+	if err != nil {
+		log.WithError(err).Errorf("failed to initialize wechat service")
+		return nil, err
 	}
 
 	logger.Debugf("new wechatd service")

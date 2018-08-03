@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"math/rand"
 	"net"
+	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -24,8 +27,10 @@ type _serveOptions struct {
 	Storage       cmd_helper.StorageOptions
 	ServiceConfig cmd_helper.ServiceConfigOptions `mapstructure:"service_config"`
 	Wechat        _wechatConfig
-	DomainId      string `mapstructure:"domain_id"`
-	ProjectId     string `mapstructure:"project_id"`
+	DomainId      string   `mapstructure:"domain_id"`
+	ProjectId     string   `mapstructure:"project_id"`
+	UserRoles     []string `mapstructure:"user_roles"`
+	_userRoles    string   `mapstructure:"-"`
 }
 
 var (
@@ -43,6 +48,29 @@ var (
 
 			var opts _serveOptions
 			cmd_helper.UnmarshalConfig(&opts)
+
+			if serve_opts.ProjectId != "" {
+				opts.ProjectId = serve_opts.ProjectId
+			}
+
+			if serve_opts.DomainId != "" {
+				opts.DomainId = serve_opts.DomainId
+			}
+
+			if serve_opts.Wechat.Appid != "" {
+				opts.Wechat.Appid = serve_opts.Wechat.Appid
+			}
+
+			if serve_opts.Wechat.Secret != "" {
+				opts.Wechat.Secret = serve_opts.Wechat.Secret
+			}
+
+			if serve_opts._userRoles != "" {
+				opts.UserRoles = []string{}
+				for _, s := range strings.Split(serve_opts._userRoles, ",") {
+					opts.UserRoles = append(opts.UserRoles, strings.TrimSpace(s))
+				}
+			}
 
 			serve_opts = &opts
 			root_opts = &serve_opts._rootOptions
@@ -72,6 +100,7 @@ func serve() error {
 		service.SetWechat(serve_opts.Wechat.Appid, serve_opts.Wechat.Secret),
 		service.SetDomainId(serve_opts.DomainId),
 		service.SetProjectId(serve_opts.ProjectId),
+		service.SetUserRoles(serve_opts.UserRoles),
 	)
 	if err != nil {
 		log.WithError(err).Errorf("failed to new wechat service")
@@ -85,6 +114,8 @@ func serve() error {
 }
 
 func init() {
+	rand.Seed(int64(time.Now().Second()))
+
 	serve_opts = &_serveOptions{}
 
 	serveCmd.Flags().StringVarP(&serve_opts.Listen, "listen", "l", "127.0.0.1:5100", "Metathings Wechat Adaptor Service listening address")
@@ -97,6 +128,7 @@ func init() {
 	serveCmd.Flags().StringVar(&serve_opts.Wechat.Secret, "wechat-secret", "", "Wechat AppSecret")
 	serveCmd.Flags().StringVar(&serve_opts.DomainId, "domain-id", "", "Created user beyond to which domain")
 	serveCmd.Flags().StringVar(&serve_opts.ProjectId, "project-id", "", "Created user beyond to which project")
+	serveCmd.Flags().StringVar(&serve_opts._userRoles, "user-roles", "", "Assign which roles to user")
 
 	RootCmd.AddCommand(serveCmd)
 }
