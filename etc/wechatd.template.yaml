@@ -1,0 +1,21 @@
+dev:
+  listen: 127.0.0.1:5101
+  verbose: false
+  log:
+    level: info
+  storage:
+    driver: <storage-driver>
+    uri: <storage-uri>
+  application_credential:
+    id: <application-crdential-id>
+    secret: <application-crdential-secret>
+  service_config:
+    identityd:
+      address: <identityd-address>
+    metathingsd:
+      address: <metathingsd-address>
+  wechat:
+    appid: <wechat-appid>
+    secret: <wechat-appsecret>
+  domain_id: <domain-id>
+  project_id: <project-id>

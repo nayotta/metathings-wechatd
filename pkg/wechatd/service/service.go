@@ -41,7 +41,7 @@ type options struct {
 
 var defaultServiceOptions = options{
 	logLevel:                       "info",
-	wechat_jscode2session_template: "https://api.weixin.qq.com/sns/jscode2session?appid={APPID}&secret={SECRET}&js_code={JSCODE}&grant_type=authorization_code",
+	wechat_jscode2session_template: "https://api.weixin.qq.com/sns/jscode2session?appid={{appid}}&secret={{secret}}&js_code={{jscode}}&grant_type=authorization_code",
 }
 
 type ServiceOptions func(*options)
@@ -140,12 +140,19 @@ func (self *metathingsWechatdService) GetWechatSession(ctx context.Context, req 
 	var sess struct {
 		SessionKey string `json:"session_key"`
 		Openid     string
+		errcode    int
+		errmsg     string
 	}
 
 	err = json.Unmarshal([]byte(http_body), &sess)
 	if err != nil {
 		self.logger.WithError(err).Errorf("failed to unmarshal http body to json")
 		return nil, status.Errorf(codes.Internal, err.Error())
+	}
+
+	if sess.errcode != 0 {
+		self.logger.WithFields(log.Fields{"errcode": sess.errcode, "errmsg": sess.errmsg}).Errorf("failed to get session from tencent wechat service")
+		return nil, status.Errorf(codes.Internal, sess.errmsg)
 	}
 
 	res := &pb.GetWechatSessionResponse{
