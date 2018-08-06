@@ -3,10 +3,12 @@ syntax = "proto3";
 package ai.metathings_wechatd.service.wechatd;
 option go_package = "wechatd";
 
+import "create_user.proto";
 import "get_wechat_session.proto";
 import "get_metathings_token.proto";
 
 service WechatdService {
+	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
 	rpc GetWechatSession(GetWechatSessionRequest) returns (GetWechatSessionResponse) {}
 	rpc GetMetathingsToken(GetMetathingsTokenRequest) returns (GetMetathingsTokenResponse) {}
 }
