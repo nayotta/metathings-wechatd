@@ -9,13 +9,14 @@ import "github.com/mwitkow/go-proto-validators/validator.proto";
 message User {
 	string Id = 1;
 	string username = 2;
-	map<string, string> extras = 3;
+	map<string, string> extra = 3;
 }
 
 message CreateUserRequest {
-	google.protobuf.StringValue username = 1;
-	google.protobuf.StringValue password = 2;
-	map<string, google.protobuf.StringValue> extras = 3;
+	google.protobuf.StringValue openid = 1 [(validator.field) = {msg_exists: true}];
+	google.protobuf.StringValue username = 2;
+	google.protobuf.StringValue password = 3;
+	map<string, string> extra = 4;
 }
 
 message CreateUserResponse {

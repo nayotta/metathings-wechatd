@@ -25,8 +25,10 @@ type Token struct {
 }
 
 type Storage interface {
-	GetApplicationCredentialByOpenid(openid string) (ApplicationCredential, error)
+	GetApplicationCredential(openid string) (ApplicationCredential, error)
 	CreateApplicationCredential(app_cred ApplicationCredential) (ApplicationCredential, error)
+	UpdateApplicationCredential(openid string, app_cred ApplicationCredential) (ApplicationCredential, error)
+	DeleteApplicationCredential(openid string) error
 	GetTokensByOpenid(openid string) ([]Token, error)
 	CreateToken(tkn Token) (Token, error)
 	DeleteToken(tkn_id string) error

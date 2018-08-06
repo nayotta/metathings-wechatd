@@ -12,5 +12,6 @@ message GetMetathingsTokenRequest {
 }
 
 message GetMetathingsTokenResponse {
-	string token = 1;
+	string openid = 1;
+	string token = 2;
 }

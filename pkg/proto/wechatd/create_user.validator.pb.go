@@ -21,9 +21,9 @@ It has these top-level messages:
 */
 package wechatd
 
+import fmt "fmt"
 import go_proto_validators "github.com/mwitkow/go-proto-validators"
 import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
 import math "math"
 import _ "github.com/golang/protobuf/ptypes/wrappers"
 import _ "github.com/mwitkow/go-proto-validators"
@@ -38,6 +38,14 @@ func (this *User) Validate() error {
 	return nil
 }
 func (this *CreateUserRequest) Validate() error {
+	if nil == this.Openid {
+		return go_proto_validators.FieldError("Openid", fmt.Errorf("message must exist"))
+	}
+	if this.Openid != nil {
+		if err := go_proto_validators.CallValidatorIfExists(this.Openid); err != nil {
+			return go_proto_validators.FieldError("Openid", err)
+		}
+	}
 	if this.Username != nil {
 		if err := go_proto_validators.CallValidatorIfExists(this.Username); err != nil {
 			return go_proto_validators.FieldError("Username", err)

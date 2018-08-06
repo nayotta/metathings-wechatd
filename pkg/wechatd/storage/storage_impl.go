@@ -11,7 +11,7 @@ type storageImpl struct {
 	logger log.FieldLogger
 }
 
-func (self *storageImpl) GetApplicationCredentialByOpenid(openid string) (ApplicationCredential, error) {
+func (self *storageImpl) GetApplicationCredential(openid string) (ApplicationCredential, error) {
 	var app_cred ApplicationCredential
 	err := self.db.First(&app_cred, "openid = ?", openid).Error
 	if err != nil {
@@ -22,13 +22,13 @@ func (self *storageImpl) GetApplicationCredentialByOpenid(openid string) (Applic
 }
 
 func (self *storageImpl) CreateApplicationCredential(app_cred ApplicationCredential) (ApplicationCredential, error) {
-	err := self.db.Create(app_cred).Error
+	err := self.db.Create(&app_cred).Error
 	if err != nil {
 		return ApplicationCredential{}, err
 	}
 
 	self.db.First(&app_cred, "openid = ?", *app_cred.Openid)
-	self.logger.WithFields(log.Fields{"openid": *app_cred.Openid, "app_cred_id": *app_cred.ApplicationCredentialId}).Debugf("create application credential")
+	self.logger.WithFields(log.Fields{"openid": *app_cred.Openid}).Debugf("create application credential")
 
 	return app_cred, nil
 }
@@ -46,7 +46,7 @@ func (self *storageImpl) GetTokensByOpenid(openid string) ([]Token, error) {
 }
 
 func (self *storageImpl) CreateToken(tkn Token) (Token, error) {
-	err := self.db.Create(tkn).Error
+	err := self.db.Create(&tkn).Error
 	if err != nil {
 		return tkn, err
 	}
@@ -63,6 +63,33 @@ func (self *storageImpl) DeleteToken(tkn_id string) error {
 		return err
 	}
 	self.logger.WithField("tkn_id", tkn_id).Debugf("delete token")
+	return nil
+}
+
+func (self *storageImpl) UpdateApplicationCredential(openid string, app_cred ApplicationCredential) (ApplicationCredential, error) {
+	err := self.db.Model(ApplicationCredential{}).Where("openid = ?", openid).Updates(ApplicationCredential{
+		ApplicationCredentialId:     app_cred.ApplicationCredentialId,
+		ApplicationCredentialSecret: app_cred.ApplicationCredentialSecret,
+	}).Error
+	if err != nil {
+		return ApplicationCredential{}, err
+	}
+
+	self.logger.WithField("openid", openid).Debugf("update application credential")
+	return ApplicationCredential{
+		Openid:                      &openid,
+		ApplicationCredentialId:     app_cred.ApplicationCredentialId,
+		ApplicationCredentialSecret: app_cred.ApplicationCredentialSecret,
+	}, nil
+}
+
+func (self *storageImpl) DeleteApplicationCredential(openid string) error {
+	err := self.db.Delete(ApplicationCredential{}, "openid = ?", openid).Error
+	if err != nil {
+		return err
+	}
+
+	self.logger.WithField("openid", openid).Debugf("delete application credential")
 	return nil
 }
 
