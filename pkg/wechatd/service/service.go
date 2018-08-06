@@ -358,6 +358,10 @@ func (self *metathingsWechatdService) issueTokenByOpenid(ctx context.Context, op
 	return tkn, nil
 }
 
+func (self *metathingsWechatdService) CreateUser(context.Context, *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	panic("unimplemented")
+}
+
 func (self *metathingsWechatdService) initialize() error {
 	cli, cfn, err := self.cli_fty.NewIdentitydServiceClient()
 	if err != nil {
