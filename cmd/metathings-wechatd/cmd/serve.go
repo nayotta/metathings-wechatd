@@ -31,6 +31,7 @@ type _serveOptions struct {
 	ProjectId     string   `mapstructure:"project_id"`
 	UserRoles     []string `mapstructure:"user_roles"`
 	_userRoles    string   `mapstructure:"-"`
+	TokenExpire   int      `mapstructure:"token_expire"`
 }
 
 var (
@@ -63,6 +64,10 @@ var (
 
 			if serve_opts.Wechat.Secret != "" {
 				opts.Wechat.Secret = serve_opts.Wechat.Secret
+			}
+
+			if opts.TokenExpire == 0 {
+				opts.TokenExpire = serve_opts.TokenExpire
 			}
 
 			if serve_opts._userRoles != "" {
@@ -101,6 +106,7 @@ func serve() error {
 		service.SetDomainId(serve_opts.DomainId),
 		service.SetProjectId(serve_opts.ProjectId),
 		service.SetUserRoles(serve_opts.UserRoles),
+		service.SetTokenExpire(time.Duration(serve_opts.TokenExpire)*time.Second),
 	)
 	if err != nil {
 		log.WithError(err).Errorf("failed to new wechat service")
@@ -129,6 +135,7 @@ func init() {
 	serveCmd.Flags().StringVar(&serve_opts.DomainId, "domain-id", "", "Created user beyond to which domain")
 	serveCmd.Flags().StringVar(&serve_opts.ProjectId, "project-id", "", "Created user beyond to which project")
 	serveCmd.Flags().StringVar(&serve_opts._userRoles, "user-roles", "", "Assign which roles to user")
+	serveCmd.Flags().IntVar(&serve_opts.TokenExpire, "token-expire", 45*60, "Metathings Token Expire Time [2700s]")
 
 	RootCmd.AddCommand(serveCmd)
 }

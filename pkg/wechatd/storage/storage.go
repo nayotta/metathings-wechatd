@@ -32,6 +32,7 @@ type Storage interface {
 	GetTokensByOpenid(openid string) ([]Token, error)
 	CreateToken(tkn Token) (Token, error)
 	DeleteToken(tkn_id string) error
+	ClearExpiredTokens(expired_at time.Time, openid ...string) error
 }
 
 func NewStorage(driver, uri string, logger log.FieldLogger) (Storage, error) {

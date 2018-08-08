@@ -1,6 +1,8 @@
 package metathings_wechatd_storage
 
 import (
+	"time"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
@@ -93,6 +95,23 @@ func (self *storageImpl) DeleteApplicationCredential(openid string) error {
 	return nil
 }
 
+func (self *storageImpl) ClearExpiredTokens(expired_at time.Time, openid ...string) error {
+	var err error
+
+	if len(openid) > 0 {
+		oid := openid[0]
+		err = self.db.Where("openid = ? and created_at < ?", oid, expired_at).Delete(Token{}).Error
+	} else {
+		err = self.db.Where("created_at < ?", expired_at).Delete(Token{}).Error
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func newStorageImpl(driver, uri string, logger log.FieldLogger) (Storage, error) {
 	db, err := gorm.Open(driver, uri)
 	if err != nil {
@@ -106,5 +125,4 @@ func newStorageImpl(driver, uri string, logger log.FieldLogger) (Storage, error)
 		logger: logger.WithField("#module", "storage"),
 		db:     db,
 	}, nil
-
 }
