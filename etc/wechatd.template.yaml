@@ -19,3 +19,8 @@ dev:
     secret: <wechat-appsecret>
   domain_id: <domain-id>
   project_id: <project-id>
+  user_roles:
+  - user
+  - agent
+  - entity
+  token_expire: <token-expire>  # 45*60s, 45 minutes

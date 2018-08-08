@@ -1,0 +1,7 @@
+FROM alpine:3.7
+
+RUN mkdir /etc/metathings-wechatd
+COPY ./bin/metathings-wechatd /usr/local/bin/metathings-wechatd
+COPY ./etc/wechatd.yaml /etc/metathings-wechatd/wechatd.yaml
+COPY ./script/wechatd_start.sh /usr/local/sbin/wechatd_start.sh
+CMD /usr/local/sbin/wechatd_start.sh

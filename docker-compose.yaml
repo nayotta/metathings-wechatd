@@ -1,0 +1,23 @@
+version: "3"
+services:
+
+  wechatd:
+    environment:
+    - MTWCD_STAGE=debug
+    build:
+      context: .
+      dockerfile: dockerfile/Dockerfile.wechatd
+    image: nayotta/wechatd
+    volumes:
+    - ./etc/wechatd.yaml:/etc/metathings-wechatd/wechatd.yaml
+    - ./data/storage:/var/metathings-wechatd/storage
+    networks:
+    - metathings-backend
+    expose:
+    - "5101"
+    restart: on-failure
+
+networks:
+  metathings-backend:
+    external:
+      name: metathings-backend

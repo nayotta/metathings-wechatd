@@ -1,0 +1,6 @@
+FROM nayotta/metathings-development
+
+RUN mkdir /etc/metathings-wechatd
+COPY ./etc/wechatd.yaml /etc/metathings-wechatd/wechatd.yaml
+COPY ./script/wechatd.dev_start.sh /usr/local/sbin/wechatd.dev_start.sh
+CMD /usr/local/sbin/wechatd.dev_start.sh

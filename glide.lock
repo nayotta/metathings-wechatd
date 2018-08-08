@@ -1,5 +1,5 @@
-hash: 21621687e70c0c09be23bbb62990c0bfa7fb387fd626f7ea7e6a41bd51dffdd4
-updated: 2018-08-02T17:37:53.629623+08:00
+hash: 64a3f90bbc6acc39a2d5ef4cb01ab2913eb442e6efc6be30c9aa121d23d00aa1
+updated: 2018-08-08T14:10:46.923551+08:00
 imports:
 - name: github.com/cbroglie/mustache
   version: eb931a9d20042e51d8a3a9ad5a9ba9bc8282c564
@@ -41,10 +41,14 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jinzhu/gorm
   version: 6ed508ec6a4ecb3531899a69cbc746ccf65a4166
+  subpackages:
+  - dialects/sqlite
 - name: github.com/jinzhu/inflection
   version: 04140366298a54a039076d798123ffa108fff46c
 - name: github.com/magiconair/properties
   version: c2353362d570a7bfa228149c62842019201cfb71
+- name: github.com/mattn/go-sqlite3
+  version: 323a32be5a2421b8c7087225079c6c900ec397cd
 - name: github.com/mitchellh/mapstructure
   version: 00c29f56e2386353d58c599509e8dc3801b0d716
 - name: github.com/moul/http2curl
